@@ -9,10 +9,12 @@ type ColumnHandler struct {
 	headers []string
 }
 
+// Returns Excel's standard last column
 func(h*ColumnHandler)lastColumn() string {
 	return "XFD"
 }
 
+// New Init the headers/columns buffer
 func New() ColumnHandler {
 	var h ColumnHandler
 
@@ -54,7 +56,10 @@ func New() ColumnHandler {
 	return h
 }
 
-func(h ColumnHandler)nextColumn(currentColumn string, skipColumns uint) string{
+
+// NextColumn returns the next column, after the given one.
+// The second param "skipColumns" jumps over N columns after the given one, and then return the expected identifier
+func(h ColumnHandler) NextColumn(currentColumn string, skipColumns uint) string{
 	currentColumn=strings.ToUpper(currentColumn)
 
 	if currentColumn==""||currentColumn==h.lastColumn() {
@@ -70,7 +75,7 @@ func(h ColumnHandler)nextColumn(currentColumn string, skipColumns uint) string{
 			if skipColumns>0 {
 				skipColumns--
 
-				return h.nextColumn(c,skipColumns)
+				return h.NextColumn(c,skipColumns)
 			}
 
 			break
@@ -80,6 +85,7 @@ func(h ColumnHandler)nextColumn(currentColumn string, skipColumns uint) string{
 	return c
 }
 
+// Columns return a slice of "howManyColumns" columns, including the given one
 func(h ColumnHandler)Columns(initialColumn string, howManyColumns uint) []string {
 	var (
 		a []string
@@ -89,7 +95,7 @@ func(h ColumnHandler)Columns(initialColumn string, howManyColumns uint) []string
 	a = append(a, c)
 
 	for i := uint(0); i < howManyColumns-1; i++ {
-		c = h.nextColumn(c, 0)
+		c = h.NextColumn(c, 0)
 
 		if c!="" {
 			a = append(a, c)
@@ -102,21 +108,23 @@ func(h ColumnHandler)Columns(initialColumn string, howManyColumns uint) []string
 func main(){
 	h:= New()
 
-	fmt.Println(h.nextColumn("Z",0))
-	fmt.Println(h.nextColumn("A",3))
-	fmt.Println(h.nextColumn("AA",0))
-	fmt.Println(h.nextColumn("AA",3))
-	fmt.Println(h.nextColumn("AZ",0))
-	fmt.Println(h.nextColumn("ZZ",0))
-	fmt.Println(h.nextColumn("XFD",0))
-	fmt.Println(h.nextColumn("XFD",2))
-	fmt.Println(h.nextColumn("XFB",0))
-	fmt.Println(h.nextColumn("XFB",1))
-	fmt.Println(h.nextColumn("XFB",2))
-	fmt.Println(h.nextColumn("XFB",3))
-	fmt.Println(h.nextColumn("323",0))
-	fmt.Println(h.nextColumn("fsdfsd",0))
-	fmt.Println(h.nextColumn("fsdfsd",0))
-	fmt.Println(h.Columns("A",5))
-	fmt.Println(h.Columns("XFA",6))
+	fmt.Println(h.NextColumn("A",0))      // Prints "B"
+	fmt.Println(h.NextColumn("A",5))      // Prints "G"
+	fmt.Println(h.NextColumn("Z",0))      // Prints "AA"
+	fmt.Println(h.NextColumn("A",3))      // Prints "E"
+	fmt.Println(h.NextColumn("AA",0))     // Prints "AB"
+	fmt.Println(h.NextColumn("AA",3))     // Prints "AE"
+	fmt.Println(h.NextColumn("AZ",0))     // Prints "BA"
+	fmt.Println(h.NextColumn("ZZ",0))     // Prints "AAA"
+	fmt.Println(h.NextColumn("XFD",0))    // Prints ""
+	fmt.Println(h.NextColumn("XFD",2))    // Prints ""
+	fmt.Println(h.NextColumn("XFB",0))    // Prints "XFC"
+	fmt.Println(h.NextColumn("XFB",1))    // Prints "XFD"
+	fmt.Println(h.NextColumn("XFB",2))    // Prints ""
+	fmt.Println(h.NextColumn("XFB",3))    // Prints ""
+	fmt.Println(h.NextColumn("323",0))    // Prints ""
+	fmt.Println(h.NextColumn("fsdfsd",0)) // Prints ""
+	fmt.Println(h.NextColumn("fsdfsd",0)) // Prints ""
+	fmt.Println(h.Columns("A",5))         // Prints "[A B C D E]"
+	fmt.Println(h.Columns("XFA",6))       // Prints "[XFA XFB XFC XFD]"
 }
